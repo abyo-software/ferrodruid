@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid — Druid-compatible OLAP engine in Rust."
+
+[[bin]]
+name = "ferrodruid"
+path = "src/main.rs"
+
+[features]
+# Phase 2.4: mTLS is the default cluster transport posture, so `cluster-tls`
+# is in the binary's default feature set too (it forwards to the cluster
+# crate's same-named default feature). A `--no-default-features` build can
+# only run the explicit PSK-over-cleartext fallback and fails loudly if the
+# operator requests the (default) mTLS posture.
+default = ["cluster-tls"]
+# Forward `cluster-tls` to the cluster crate so the binary's CLI handler
+# compiles the mTLS-aware code paths gated by the same feature.
+cluster-tls = ["ferrodruid-cluster/cluster-tls"]
+# Paid AWS Marketplace **Container** product: gate startup on an
+# AWS Marketplace `RegisterUsage` entitlement check. Default OFF, so the
+# open-source single-binary build is byte-identical and pulls in no AWS
+# SDK. Enabling it activates the optional `ferrodruid-marketplace`
+# dependency and forwards its own `marketplace-metering` feature (the
+# real AWS calls).
+marketplace-metering = [
+    "dep:ferrodruid-marketplace",
+    "ferrodruid-marketplace/marketplace-metering",
+]
+
+[dependencies]
+ferrodruid-common = { path = "../../crates/ferrodruid-common" }
+ferrodruid-rest = { path = "../../crates/ferrodruid-rest" }
+ferrodruid-cluster = { path = "../../crates/ferrodruid-cluster" }
+ferrodruid-discovery = { path = "../../crates/ferrodruid-discovery" }
+ferrodruid-coordinator = { path = "../../crates/ferrodruid-coordinator" }
+ferrodruid-overlord = { path = "../../crates/ferrodruid-overlord" }
+ferrodruid-broker = { path = "../../crates/ferrodruid-broker" }
+ferrodruid-historical = { path = "../../crates/ferrodruid-historical" }
+ferrodruid-middlemanager = { path = "../../crates/ferrodruid-middlemanager" }
+ferrodruid-router = { path = "../../crates/ferrodruid-router" }
+ferrodruid-metadata = { path = "../../crates/ferrodruid-metadata" }
+ferrodruid-deep-storage = { path = "../../crates/ferrodruid-deep-storage" }
+ferrodruid-auth = { path = "../../crates/ferrodruid-auth" }
+ferrodruid-authz = { path = "../../crates/ferrodruid-authz" }
+ferrodruid-telemetry = { path = "../../crates/ferrodruid-telemetry" }
+ferrodruid-lookup = { path = "../../crates/ferrodruid-lookup" }
+ferrodruid-msq = { path = "../../crates/ferrodruid-msq" }
+ferrodruid-role = { path = "../../crates/ferrodruid-role" }
+# Optional — only compiled when the `marketplace-metering` feature is on
+# (paid AWS Marketplace Container product). Off by default.
+ferrodruid-marketplace = { workspace = true, optional = true }
+anyhow.workspace = true
+serde_json.workspace = true
+clap = { version = "4", features = ["derive", "env"] }
+parking_lot.workspace = true
+rand.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+axum.workspace = true
+chrono.workspace = true

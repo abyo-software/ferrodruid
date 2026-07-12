@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Wave 30 — derive an apache/druid:30.0.1 image with perl + netcat
+# installed so the bundled `bin/start-micro-quickstart` (which uses
+# the perl-based `supervise` script) can launch the all-in-one Druid
+# stack inside a single container.
+#
+# The stock apache/druid:30.0.1 image is distroless and ships without
+# perl, so `start-micro-quickstart` fails immediately with
+# `bad interpreter: /usr/bin/env: No such file or directory`.
+#
+# We re-base on debian:bookworm-slim and copy /opt/druid + /druid.sh
+# from the official image.  This is purely a packaging fix — no Druid
+# source code is modified.
+
+FROM debian:bookworm-slim AS base
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        bash \
+        coreutils \
+        curl \
+        netcat-openbsd \
+        openjdk-17-jre-headless \
+        perl \
+        procps \
+        python3 \
+ && rm -rf /var/lib/apt/lists/*
+
+FROM apache/druid:30.0.1 AS druid
+
+FROM base
+COPY --from=druid /opt/druid /opt/druid
+COPY --from=druid /druid.sh /druid.sh
+RUN chmod +x /druid.sh /opt/druid/bin/*.sh /opt/druid/bin/start-* \
+             /opt/druid/bin/supervise /opt/druid/bin/run-druid \
+             /opt/druid/bin/run-java
+WORKDIR /opt/druid
+ENV PATH=/opt/druid/bin:$PATH
+# Let Druid auto-detect java from PATH (openjdk-17-jre-headless sets it).
+# `start-micro-quickstart` writes its var/ tree under /opt/druid, so we
+# need a writable cwd.
+ENTRYPOINT ["/opt/druid/bin/start-micro-quickstart"]

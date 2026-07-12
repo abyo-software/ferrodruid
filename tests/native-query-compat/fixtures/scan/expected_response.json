@@ -1,0 +1,8 @@
+{
+  "segmentId": "wikipedia_2024-01-01T00:00:00.000Z_2024-01-03T00:00:00.000Z_v1",
+  "columns": ["__time", "region", "added"],
+  "events": [
+    {"__time": "2024-01-01T00:00:00.000Z", "region": "eu", "added": 30.0},
+    {"__time": "2024-01-02T00:00:00.000Z", "region": "eu", "added": 40.0}
+  ]
+}

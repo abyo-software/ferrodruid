@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-query"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Druid Native Query JSON parser and executor (timeseries, topN, groupBy, scan, search, segmentMetadata, dataSourceMetadata, timeBoundary)."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+ferrodruid-aggregator = { path = "../ferrodruid-aggregator" }
+ferrodruid-sketches = { path = "../ferrodruid-sketches" }
+ferrodruid-bitmap = { path = "../ferrodruid-bitmap" }
+ferrodruid-search = { path = "../ferrodruid-search" }
+ferrodruid-lookup = { path = "../ferrodruid-lookup" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+regex.workspace = true
+ordered-float = "4"
+rayon.workspace = true
+
+[dev-dependencies]
+ferrodruid-bitmap = { path = "../ferrodruid-bitmap" }
+ferrodruid-dict = { path = "../ferrodruid-dict" }
+proptest = "1.4"

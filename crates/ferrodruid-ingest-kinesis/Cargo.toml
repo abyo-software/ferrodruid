@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-ingest-kinesis"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Kinesis indexing service for FerroDruid."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true

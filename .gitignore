@@ -1,0 +1,67 @@
+# Build artifacts
+/target/
+/bench/target/
+/fuzz/target/
+/fuzz/corpus/
+/fuzz/artifacts/
+**/*.rs.bk
+
+# Editor / OS
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Environment
+.env
+.env.*
+
+# Node (UI build tooling)
+node_modules/
+
+# Test / coverage artifacts
+*.profraw
+*.profdata
+lcov.info
+tarpaulin-report.html
+
+# Benchmark artifacts
+criterion/
+
+# Per-run live-diff outputs (curated results live in the vendor evidence pack)
+tests/druid-compat/RESULTS_wave30_run.md
+tests/druid-compat/RESULTS_wave30_run_stdout.txt
+
+# Cargo lock is committed for binaries (workspace has bins)
+# Cargo.lock — DO NOT gitignore
+
+# Terraform provider cache (.terraform.lock.hcl IS committed)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+
+# Mutation-testing output
+mutants.out/
+mutants.out.old/
+
+# Per-run live-diff stdout (curated results live in the vendor evidence pack)
+tests/druid-compat/RESULTS_wave*_run_stdout.txt
+
+# Out-of-workspace standalone test crates carry their own target/
+# (opt-out [workspace] tables); committed Cargo.lock is in-repo, target/
+# is runtime build cache: never commit these.
+tests/segment-compat/target/
+tests/cross-host/msq_multihost_shim/target/
+tests/cross-host/msq_multihost_shim/Cargo.lock
+tests/bench-ec2/tpch_w2c/target/
+
+# W2-C EC2 launch metadata (instance ids, ips, etc) — re-generated per
+# launch and not authoritative evidence; the curated results live in
+# the vendor evidence pack.
+tests/bench-ec2/tpch_w2c/RESULTS_w2c/

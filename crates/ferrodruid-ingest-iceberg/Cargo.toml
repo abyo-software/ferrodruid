@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-ingest-iceberg"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Apache Iceberg connector for FerroDruid (Phase 2)."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true

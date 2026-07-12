@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-cluster"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "openraft integration replacing ZooKeeper for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bytes.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+rand.workspace = true
+
+# Wave 40-A: cluster wire authentication.
+# - `hmac` + `sha2` produce per-frame HMAC-SHA256 tags so a network adversary
+#   cannot forge `ReplicateAck` / `VoteRequest` / `Heartbeat` frames over the
+#   cluster TCP port and fabricate quorum / steal votes (closes the W39 NEW
+#   Critical + High findings). All three crates are already in the workspace
+#   transitively (argon2, sqlx, rustls), so no new top-level deps are added.
+# - `subtle` provides the constant-time comparison primitive used by
+#   `hmac::Mac::verify_slice` internally; declared explicitly so this crate
+#   does not depend on a transitive feature flag.
+hmac = "0.12"
+sha2 = "0.10"
+subtle = "2"
+
+# Wave 44 / Phase 2.4: mTLS for cluster wire confidentiality + forward
+# secrecy. The `cluster-tls` feature is ON by default because mTLS is the
+# default cluster transport posture; the deps stay `optional` so a
+# deployment that deliberately drops to the explicit PSK-cleartext fallback
+# can build with `--no-default-features` and shed the rustls stack.
+rustls = { version = "0.23", default-features = false, features = ["std", "ring"], optional = true }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring"], optional = true }
+rustls-pemfile = { version = "2", optional = true }
+rustls-pki-types = { version = "1", optional = true }
+# DD R21 (High): bind the handshake-announced node id to the TLS peer
+# certificate identity (SAN DNS/URI + CN), so a holder of one valid CA-signed
+# node cert + the shared PSK cannot announce a DIFFERENT node id and forge
+# quorum acks/votes as that node. Used only on the mTLS code path.
+x509-parser = { version = "0.18", optional = true }
+
+[features]
+# Phase 2.4: mTLS is the default cluster transport posture, so `cluster-tls`
+# is in the default feature set. PSK frame auth (Wave 40-A) is always
+# required at build time; the default build additionally compiles the mTLS
+# path and selects it by default. A build with `--no-default-features` can
+# only run the explicit PSK-cleartext opt-in fallback.
+default = ["cluster-tls"]
+# mTLS support. Adds `tokio-rustls` + PEM loader, exposes the
+# [`crate::tls`] module, and enables the `ClusterSecurityMode::MutualTls`
+# variant.
+cluster-tls = ["dep:tokio-rustls", "dep:rustls", "dep:rustls-pemfile", "dep:rustls-pki-types", "dep:x509-parser"]
+
+[dev-dependencies]
+tempfile.workspace = true
+tokio = { workspace = true, features = ["test-util"] }
+# Wave 44: self-signed certs for the optional mTLS integration tests.
+# Test-only — never linked into production binaries.
+rcgen = "0.13"

@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-overlord"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Ingestion task assignment for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-metadata = { path = "../ferrodruid-metadata" }
+ferrodruid-historical = { path = "../ferrodruid-historical" }
+ferrodruid-ingest-batch = { path = "../ferrodruid-ingest-batch" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tempfile.workspace = true
+ferrodruid-query = { path = "../ferrodruid-query" }

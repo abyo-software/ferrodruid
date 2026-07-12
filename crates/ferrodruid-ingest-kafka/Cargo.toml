@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-ingest-kafka"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Kafka indexing service for FerroDruid."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+ferrodruid-ingest-batch = { path = "../ferrodruid-ingest-batch" }
+ferrodruid-middlemanager = { path = "../ferrodruid-middlemanager" }
+rdkafka = { version = "0.37", features = ["cmake-build"], optional = true }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+
+[features]
+default = []
+kafka-io = ["rdkafka"]
+
+[dev-dependencies]
+tempfile.workspace = true

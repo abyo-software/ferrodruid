@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-role"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Role-split scaffold for FerroDruid v1.0 (broker/historical/coordinator dispatch)."
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+tracing.workspace = true

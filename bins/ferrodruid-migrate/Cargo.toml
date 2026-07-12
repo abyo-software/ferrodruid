@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-migrate"
+version = "1.2.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid migration tool — import Druid metadata and segments + W1-I cross-role cert helper."
+
+[[bin]]
+name = "ferrodruid-migrate"
+path = "src/main.rs"
+
+[dependencies]
+ferrodruid-import-export = { path = "../../crates/ferrodruid-import-export" }
+ferrodruid-metadata = { path = "../../crates/ferrodruid-metadata" }
+ferrodruid-common = { path = "../../crates/ferrodruid-common" }
+clap = { version = "4", features = ["derive"] }
+# W1-I (CL-J1): rcgen powers the `gen-cross-role-certs` helper;
+# thiserror gives the helper a typed error variant.
+rcgen.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+# Used in the helper's unit tests to validate the generated CA + leaf
+# chain by attempting to build a real rustls server config from it.
+rustls.workspace = true
+rustls-pemfile.workspace = true
+rustls-pki-types.workspace = true

@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Wave 33 — Apache Superset image with the pydruid SQLAlchemy
+# dialect installed so Superset can connect to FerroDruid as a
+# Druid datasource.
+#
+# The stock apache/superset image does NOT bundle pydruid, so a
+# fresh `pip install pydruid` is required.
+
+## W2-D 2026-06-30: pinned from :latest to :4.1.4 because Superset
+## 6.x has not yet shipped to the apache/superset Docker Hub channel
+## and "latest" began floating to a stricter ExecutePayloadSchema
+## (rejects the legacy `json` field with "Unknown field.").  4.1.4 is
+## the latest semver release on the public registry as of this run
+## (released 2025-08-28).
+FROM apachesuperset.docker.scarf.sh/apache/superset:4.1.4
+
+USER root
+
+# Install pydruid (the historical SQLAlchemy driver Superset's
+# DruidEngineSpec relies on).  Pinned to a release that is known to
+# work with SQLAlchemy 1.4.x (Superset 6.0.x's bundled version).
+#
+# The official apache/superset image ships its venv via uv with no
+# bundled pip, so we bootstrap pip into the venv first via
+# `ensurepip --upgrade`, then install pydruid into the same venv.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/local/bin/python -m ensurepip --upgrade \
+    && /usr/local/bin/python -m pip install --no-cache-dir --upgrade pip \
+    && /usr/local/bin/python -m pip install --no-cache-dir \
+        "pydruid[sqlalchemy]==0.6.9" \
+        "psycopg2-binary>=2.9,<3" \
+    && /usr/local/bin/python -c "from pydruid.db.sqlalchemy import DruidDialect; print('pydruid dialect OK')" \
+    && /usr/local/bin/python -c "import psycopg2; print('psycopg2 OK', psycopg2.__version__)"
+
+USER superset

@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Wave 47-B — Apache Druid 32.0.1 compatibility harness.
+#
+# Druid 32.x is the latest 32-series patch (32.0.1, released 2025-Q1).
+# Hadoop-based ingestion was deprecated in this release.
+#
+# Host ports are offset by +10000 vs the v30 compose so all three
+# versions (30 / 32 / 35) can run simultaneously without conflict:
+#   v30 : 8888..  (default)
+#   v32 : 18888..
+#   v35 : 28888..
+
+services:
+  druid:
+    build:
+      context: .
+      dockerfile: Dockerfile.druid.template
+      args:
+        DRUID_VERSION: 32.0.1
+    image: ferrodruid/druid-compat:32.0.1
+    ports:
+      - "18888:8888"   # Router
+      - "18081:8081"   # Coordinator
+      - "18082:8082"   # Broker
+      - "18083:8083"   # Historical
+      - "18090:8090"   # Overlord
+      - "18091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 240s
