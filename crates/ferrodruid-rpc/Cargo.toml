@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-rpc"
+version = "1.3.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Cross-role HTTP RPC contracts for FerroDruid v1.0 (router→broker, overlord→middleManager)."
+
+[dependencies]
+ferrodruid-aggregator = { path = "../ferrodruid-aggregator" }
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-deep-storage = { path = "../ferrodruid-deep-storage" }
+ferrodruid-query = { path = "../ferrodruid-query" }
+ferrodruid-role = { path = "../ferrodruid-role" }
+ferrodruid-sql = { path = "../ferrodruid-sql" }
+async-trait.workspace = true
+axum.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+
+# W1-I (CL-J1): cross-role HTTP wire mTLS.  axum-server gives us
+# `bind_rustls` for the receiving side; tokio-rustls + rustls-pemfile load
+# PEM credentials for both the inbound TLS acceptor and the outbound
+# `reqwest::Client` identity / CA root store.
+axum-server.workspace = true
+rustls.workspace = true
+tokio-rustls.workspace = true
+rustls-pemfile.workspace = true
+rustls-pki-types.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
+rcgen.workspace = true

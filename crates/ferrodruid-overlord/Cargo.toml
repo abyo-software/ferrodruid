@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-overlord"
+version = "1.3.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Ingestion task assignment for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-metadata = { path = "../ferrodruid-metadata" }
+ferrodruid-historical = { path = "../ferrodruid-historical" }
+ferrodruid-ingest-batch = { path = "../ferrodruid-ingest-batch" }
+# Unconditional (default-features = false → no librdkafka): the spec
+# parse/validate API is needed in EVERY build so a Kafka supervisor POST is
+# validated before persist even without kafka-io (Codex R14). The `kafka-io`
+# feature turns on its rdkafka consumer.
+ferrodruid-ingest-kafka = { path = "../ferrodruid-ingest-kafka", default-features = false }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+ferrodruid-deep-storage = { path = "../ferrodruid-deep-storage" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+# Segment staging for deep-storage persistence (persist.rs): secure, unique,
+# auto-cleaned tempdir — never a predictable raw /tmp path.
+tempfile.workspace = true
+# Content-identity hash of a persisted v9 blob (persist.rs): stamped into the
+# metadata row and re-checked on bootstrap reload so a swapped/silently
+# corrupted durable segment fails loud instead of serving different data (H2).
+sha2.workspace = true
+hex.workspace = true
+
+[features]
+default = []
+# Wire real Kafka supervisor ingestion: `create_supervisor` spawns a
+# streaming consumer per Kafka spec that publishes segments into the
+# Historical. Pulls in `ferrodruid-ingest-kafka` with its `kafka-io`
+# feature (librdkafka via rdkafka). Off by default so the standard build
+# needs no C toolchain / librdkafka.
+kafka-io = ["ferrodruid-ingest-kafka/kafka-io"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+ferrodruid-query = { path = "../ferrodruid-query" }
+async-trait.workspace = true

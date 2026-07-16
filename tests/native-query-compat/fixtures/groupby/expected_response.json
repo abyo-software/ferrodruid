@@ -1,0 +1,20 @@
+[
+  {
+    "version": "v1",
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "event": {
+      "region": "eu",
+      "rows": 2,
+      "added_total": 70.0
+    }
+  },
+  {
+    "version": "v1",
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "event": {
+      "region": "us",
+      "rows": 3,
+      "added_total": 90.0
+    }
+  }
+]

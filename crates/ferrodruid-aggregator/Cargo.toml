@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-aggregator"
+version = "1.3.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Druid-compatible aggregation engine (count, sum, min, max, cardinality, quantile, histogram)."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-sketches = { path = "../ferrodruid-sketches" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+ordered-float = "4"
+base64 = "0.22"
+# Collision-free clipping of over-long exact-cardinality keys (full-key
+# SHA-256 digest instead of prefix truncation, 2026-07-12).
+sha2.workspace = true
+
+[dev-dependencies]
+proptest = "1.4"

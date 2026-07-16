@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-migrate"
+version = "1.3.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid migration tool — import Druid metadata and segments + W1-I cross-role cert helper."
+
+[[bin]]
+name = "ferrodruid-migrate"
+path = "src/main.rs"
+
+[dependencies]
+ferrodruid-import-export = { path = "../../crates/ferrodruid-import-export" }
+ferrodruid-metadata = { path = "../../crates/ferrodruid-metadata" }
+ferrodruid-common = { path = "../../crates/ferrodruid-common" }
+# `assess` opens candidate segments with the real v9 reader
+# (SegmentData::open) so the readability verdict is the reader's own.
+ferrodruid-segment = { path = "../../crates/ferrodruid-segment" }
+clap = { version = "4", features = ["derive"] }
+# W1-I (CL-J1): rcgen powers the `gen-cross-role-certs` helper;
+# thiserror gives the helper a typed error variant.
+rcgen.workspace = true
+serde_json.workspace = true
+# `assess` extracts each `index.zip` into a throwaway tempdir before
+# handing it to the v9 reader.
+tempfile.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+# Druid packs local deep-storage segments as deflate `index.zip`
+# archives (when `druid.storage.zip=true`); same pin as the
+# tests/segment-compat harness.
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+# Used in the helper's unit tests to validate the generated CA + leaf
+# chain by attempting to build a real rustls server config from it.
+rustls.workspace = true
+rustls-pemfile.workspace = true
+rustls-pki-types.workspace = true

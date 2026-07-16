@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Docker Compose stack for Apache Druid compatibility testing.
+# Starts Druid 30.0.1 (micro-quickstart, single container — bundled
+# Derby metadata + ZooKeeper) for Wave 30 wire/JSON diff testing.
+
+services:
+  druid:
+    # Re-base apache/druid:30.0.1 onto debian:bookworm-slim with perl +
+    # netcat installed so the bundled `start-micro-quickstart` (and its
+    # perl-based `supervise`) can launch Druid.  See Dockerfile.druid
+    # for the rationale.
+    build:
+      context: .
+      dockerfile: Dockerfile.druid
+    image: ferrodruid/druid-compat:30.0.1
+    # Use the bundled micro-quickstart launcher.  This spawns all 6 Druid
+    # services (coordinator, overlord, broker, router, historical,
+    # middleManager) inside a single container with bundled Derby +
+    # ZooKeeper.
+    ports:
+      - "8888:8888"   # Router
+      - "8081:8081"   # Coordinator
+      - "8082:8082"   # Broker
+      - "8083:8083"   # Historical
+      - "8090:8090"   # Overlord
+      - "8091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 180s
