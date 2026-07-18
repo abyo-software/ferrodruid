@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-cli"
+version = "1.4.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid admin CLI."
+
+[[bin]]
+name = "ferrodruid-cli"
+path = "src/main.rs"
+
+[dependencies]
+ferrodruid-cli-lib = { path = "../../crates/ferrodruid-cli-lib" }
+clap = { version = "4", features = ["derive"] }
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

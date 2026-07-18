@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-plugin-rt"
+version = "1.4.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "WASM plugin runtime for FerroDruid — Wasmtime-backed, deny-by-default capabilities, fuel-bounded execution."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+thiserror.workspace = true
+tracing.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+wasmtime.workspace = true
+wat.workspace = true
+sha2.workspace = true
+hex.workspace = true
+reqwest = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+
+[dev-dependencies]
+wiremock.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+hmac.workspace = true
+sha2.workspace = true
+base64.workspace = true
+hex.workspace = true
+reqwest = { workspace = true }
+
+[features]
+default = []
+# Enable the blocking HTTP host capability (required for the example
+# http-jsonl input source plugin to actually fetch URLs at runtime).
+# Off by default — operators who want to load network-capable plugins
+# must opt in via this feature flag.
+net-capability = ["dep:reqwest", "dep:tokio"]

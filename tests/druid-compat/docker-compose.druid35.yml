@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Wave 47-B — Apache Druid 35.0.1 compatibility harness.
+#
+# Druid 35.x is the latest 35-series patch (35.0.1).  Druid 35 writes
+# on-disk segment format v9 (see compatibility-matrix.md →
+# "Segment File Format").
+#
+# Host ports are offset by +20000 vs the v30 compose so all three
+# versions (30 / 32 / 35) can run simultaneously without conflict.
+
+services:
+  druid:
+    build:
+      context: .
+      dockerfile: Dockerfile.druid.template
+      args:
+        DRUID_VERSION: 35.0.1
+    image: ferrodruid/druid-compat:35.0.1
+    ports:
+      - "28888:8888"   # Router
+      - "28081:8081"   # Coordinator
+      - "28082:8082"   # Broker
+      - "28083:8083"   # Historical
+      - "28090:8090"   # Overlord
+      - "28091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 300s

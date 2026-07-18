@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Wave 47-C — Apache Druid 33.0.0 compatibility harness.
+#
+# Druid 33.x has only one published patch (33.0.0).  Fills the gap
+# between v32 and v35 in the live compat matrix.
+#
+# Host ports use the 33xxx prefix so this stack can run alongside
+# v30/v32/v35/v36 without conflict.
+
+services:
+  druid:
+    build:
+      context: .
+      dockerfile: Dockerfile.druid.template
+      args:
+        DRUID_VERSION: 33.0.0
+    image: ferrodruid/druid-compat:33.0.0
+    ports:
+      - "33888:8888"   # Router
+      - "33081:8081"   # Coordinator
+      - "33082:8082"   # Broker
+      - "33083:8083"   # Historical
+      - "33090:8090"   # Overlord
+      - "33091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 300s

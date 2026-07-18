@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-sketches"
+version = "1.4.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Probabilistic sketch data structures (Theta, HLL, KLL, T-digest, DDSketch)."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+bytes.workspace = true
+byteorder.workspace = true
+thiserror.workspace = true
+rand.workspace = true

@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy", "llvm-tools-preview"]
+targets = ["x86_64-unknown-linux-musl", "aarch64-unknown-linux-musl"]

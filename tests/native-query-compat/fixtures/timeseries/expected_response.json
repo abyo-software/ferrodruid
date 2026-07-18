@@ -1,0 +1,16 @@
+[
+  {
+    "timestamp": "2024-01-01T00:00:00.000Z",
+    "result": {
+      "rows": 3,
+      "added_total": 60.0
+    }
+  },
+  {
+    "timestamp": "2024-01-02T00:00:00.000Z",
+    "result": {
+      "rows": 3,
+      "added_total": 150.0
+    }
+  }
+]

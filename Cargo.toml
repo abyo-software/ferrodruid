@@ -1,0 +1,211 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/ferrodruid-common",
+    "crates/ferrodruid-compression",
+    "crates/ferrodruid-bitmap",
+    "crates/ferrodruid-dict",
+    "crates/ferrodruid-segment",
+    "crates/ferrodruid-aggregator",
+    "crates/ferrodruid-sketches",
+    "crates/ferrodruid-search",
+    "crates/ferrodruid-query",
+    "crates/ferrodruid-sql",
+    "crates/ferrodruid-msq",
+    "crates/ferrodruid-rest",
+    "crates/ferrodruid-broker",
+    "crates/ferrodruid-historical",
+    "crates/ferrodruid-coordinator",
+    "crates/ferrodruid-overlord",
+    "crates/ferrodruid-middlemanager",
+    "crates/ferrodruid-router",
+    "crates/ferrodruid-cluster",
+    "crates/ferrodruid-discovery",
+    "crates/ferrodruid-deep-storage",
+    "crates/ferrodruid-metadata",
+    "crates/ferrodruid-metadata-schema",
+    "crates/ferrodruid-loadrules",
+    "crates/ferrodruid-lookup",
+    "crates/ferrodruid-tiered",
+    "crates/ferrodruid-ingest-kafka",
+    "crates/ferrodruid-ingest-kinesis",
+    "crates/ferrodruid-ingest-batch",
+    "crates/ferrodruid-ingest-iceberg",
+    "crates/ferrodruid-ingest-deltalake",
+    "crates/ferrodruid-auth",
+    "crates/ferrodruid-authz",
+    "crates/ferrodruid-ui",
+    "crates/ferrodruid-cli-lib",
+    "crates/ferrodruid-import-export",
+    "crates/ferrodruid-telemetry",
+    "crates/ferrodruid-events",
+    "crates/ferrodruid-plugin-rt",
+    "crates/ferrodruid-role",
+    "crates/ferrodruid-rpc",
+    "crates/ferrodruid-marketplace",
+    "crates/ferrodruid-compat-check",
+    "crates/ferrodruid-logcompat",
+    "bins/ferrodruid",
+    "bins/ferrodruid-cli",
+    "bins/ferrodruid-migrate",
+    "bins/ferrodruid-broker",
+    "bins/ferrodruid-historical",
+    "bins/ferrodruid-coordinator",
+    "bins/ferrodruid-router",
+    "bins/ferrodruid-overlord",
+    "bins/ferrodruid-middlemanager",
+]
+
+[workspace.package]
+# Canonical workspace version. Matches the release git tag; every member
+# crate pins the same version explicitly (no member inherits via
+# `version.workspace = true`, so this key is the single documented source
+# of truth rather than a build input). Version bumps update this key and
+# every member together.
+version = "1.4.0"
+edition = "2024"
+rust-version = "1.85"
+license = "BUSL-1.1"
+repository = "https://github.com/abyo-software/ferrodruid"
+authors = ["abyo software 合同会社 (abyo software LLC) <aws-support@abyo.net>"]
+
+[workspace.dependencies]
+# Web framework
+axum = "0.8"
+tower-http = "0.6"
+tower = "0.5"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+# preserve_order: JSON objects keep insertion order (IndexMap) instead of
+# sorting keys. Required for BI-tool SQL compatibility — Apache Superset / the
+# pydruid dialect map result columns to the SELECT list positionally, so the
+# `/druid/v2/sql` rows must be emitted in projection order, not alphabetical.
+serde_json = { version = "1", features = ["preserve_order"] }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+prometheus = "0.13"
+
+# Database drivers
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "mysql", "sqlite"] }
+
+# Bitmap / roaring
+roaring = "0.10"
+
+# Arrow / DataFusion (query engine)
+arrow = "55"
+datafusion = "45"
+
+# Compression
+lz4_flex = "0.11"
+zstd = "0.13"
+
+# Byte manipulation
+bytes = "1"
+byteorder = "1"
+
+# Filesystem advisory locks (FG-7 spill-root cross-instance ownership).
+# Pinned to the 0.8 line already resolved transitively via tantivy, so adding
+# it as a direct dependency pulls no new version into the tree. Provides safe
+# flock-based `std::fs::File` locking through its `FileExt` trait — no raw
+# syscalls, so our crates keep `#![forbid(unsafe_code)]` intact.
+fs4 = "0.8"
+
+# `O_NOFOLLOW` constant for symlink-refusing source-file opens in
+# `ferrodruid-migrate` (compat-2 R2 H2 TOCTOU hardening). Already resolved
+# transitively (tokio et al.), so this pins no new version. Only the flag
+# CONSTANT is used, through the safe `OpenOptionsExt::custom_flags` — no raw
+# syscalls, `#![forbid(unsafe_code)]` stays intact.
+libc = "0.2"
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+toml = "0.8"
+
+# Common utilities
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+url = "2"
+# Data-parallel query execution (shared global pool; bounds total threads
+# across concurrent queries, unlike per-query thread spawning).
+rayon = "1"
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+rustls = "0.23"
+# Cross-role HTTP wire mTLS (W1-I / CL-J1).  `axum-server` is the TLS-capable
+# server wrapper around axum 0.8 the per-role binaries use to bind a
+# `bind_rustls` listener.  `tokio-rustls` / `rustls-pemfile` / `rustls-pki-types`
+# are the PEM-loading + handshake stack shared with the cluster wire mTLS path.
+axum-server = { version = "0.8", default-features = false, features = ["tls-rustls-no-provider"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring"] }
+rustls-pemfile = "2"
+rustls-pki-types = "1"
+# Self-signed certs for cross-role mTLS test fixtures and the
+# `ferrodruid-migrate gen-cross-role-certs` helper.
+rcgen = "0.13"
+
+# Consensus
+openraft = "0.10.0-alpha.18"
+
+# Full-text search
+tantivy = "0.22"
+
+# Object storage
+object_store = { version = "0.12", features = ["aws"] }
+
+# Stream combinators
+futures = "0.3"
+
+# Concurrency
+parking_lot = "0.12"
+dashmap = "6"
+async-trait = "0.1"
+
+# Auth
+argon2 = "0.5"
+
+# WASM plugin runtime (CL-6 / W1-F)
+# Wasmtime provides JIT-compiled WebAssembly execution with fuel metering
+# and per-store memory limits.  Brought in for ferrodruid-plugin-rt only;
+# every other crate must remain wasmtime-free.
+wasmtime = { version = "46", default-features = false, features = ["cranelift", "runtime", "parallel-compilation", "std", "wat"] }
+wat = "1"
+sha2 = "0.10"
+hmac = "0.12"
+base64 = "0.22"
+hex = "0.4"
+
+# AWS Marketplace entitlement (paid Container product, opt-in feature)
+ferrodruid-marketplace = { path = "crates/ferrodruid-marketplace" }
+
+# Testing / benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3"
+rand = "0.8"
+regex = "1"
+# S3 fault-injection mocking (deep-storage-compat tests)
+wiremock = "0.6"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+[profile.bench]
+inherits = "release"
+debug = 1
+strip = "none"
+
+[profile.dev]
+opt-level = 0
+debug = true

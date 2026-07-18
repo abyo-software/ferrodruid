@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# Wave 47-C — Apache Druid 36.0.0 compatibility harness.
+#
+# Druid 36.x is the latest 36-series patch (36.0.0 — only patch
+# released at the time this harness was added).  Latest stable as of
+# 2026-05-07.  Same SQL-over-HTTP surface as 30/32/35; included to
+# verify that wire-compat extends to the current upstream release.
+#
+# Host ports use the 36xxx prefix so this stack can run alongside
+# v30/v32/v35 (8888 / 18888 / 28888) without conflict.
+
+services:
+  druid:
+    build:
+      context: .
+      dockerfile: Dockerfile.druid.template
+      args:
+        DRUID_VERSION: 36.0.0
+    image: ferrodruid/druid-compat:36.0.0
+    ports:
+      - "36888:8888"   # Router
+      - "36081:8081"   # Coordinator
+      - "36082:8082"   # Broker
+      - "36083:8083"   # Historical
+      - "36090:8090"   # Overlord
+      - "36091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 300s

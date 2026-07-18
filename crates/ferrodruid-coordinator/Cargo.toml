@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-coordinator"
+version = "1.4.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Segment balancing and load rules for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-metadata = { path = "../ferrodruid-metadata" }
+ferrodruid-loadrules = { path = "../ferrodruid-loadrules" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

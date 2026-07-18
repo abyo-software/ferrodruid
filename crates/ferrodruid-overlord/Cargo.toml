@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-overlord"
+version = "1.4.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Ingestion task assignment for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-metadata = { path = "../ferrodruid-metadata" }
+ferrodruid-historical = { path = "../ferrodruid-historical" }
+ferrodruid-ingest-batch = { path = "../ferrodruid-ingest-batch" }
+# Unconditional (default-features = false → no librdkafka): the spec
+# parse/validate API is needed in EVERY build so a Kafka supervisor POST is
+# validated before persist even without kafka-io (Codex R14). The `kafka-io`
+# feature turns on its rdkafka consumer.
+ferrodruid-ingest-kafka = { path = "../ferrodruid-ingest-kafka", default-features = false }
+# Unconditional (default-features = false → no aws-sdk), mirroring the
+# kafka posture: the Kinesis spec parse/validate API and the
+# mock-drivable consume loop are needed in every build (a kinesis POST is
+# validated before persist even without kinesis-io); the `kinesis-io`
+# feature turns on the real aws-sdk-kinesis source (compat-5).
+ferrodruid-ingest-kinesis = { path = "../ferrodruid-ingest-kinesis", default-features = false }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+ferrodruid-deep-storage = { path = "../ferrodruid-deep-storage" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+# Segment staging for deep-storage persistence (persist.rs): secure, unique,
+# auto-cleaned tempdir — never a predictable raw /tmp path.
+tempfile.workspace = true
+# The content-identity hash of a persisted v9 blob (persist.rs) — stamped
+# into the metadata row and re-checked on bootstrap reload (H2) — is the
+# shared `ferrodruid_deep_storage::blob_content_hash`, so no direct
+# sha2/hex dependency remains here.
+
+# `O_NOFOLLOW` constant for symlink-refusing reads of local batch input
+# files (compat-4 Codex R1 H2: close the canonicalize→read TOCTOU so a
+# file swapped for a symlink after the containment check is not followed
+# outside baseDir). Only the flag CONSTANT is used, through the safe
+# `OpenOptionsExt::custom_flags` — no raw syscalls, `#![forbid(unsafe_code)]`
+# stays intact.
+[target.'cfg(unix)'.dependencies]
+libc.workspace = true
+
+[features]
+default = []
+# Wire real Kafka supervisor ingestion: `create_supervisor` spawns a
+# streaming consumer per Kafka spec that publishes segments into the
+# Historical. Pulls in `ferrodruid-ingest-kafka` with its `kafka-io`
+# feature (librdkafka via rdkafka). Off by default so the standard build
+# needs no C toolchain / librdkafka.
+kafka-io = ["ferrodruid-ingest-kafka/kafka-io"]
+# Wire real Kinesis supervisor ingestion (compat-5): `create_supervisor`
+# spawns a streaming consumer per Kinesis spec that polls the stream via
+# aws-sdk-kinesis and publishes durable segments into the Historical.
+# Off by default so the standard build pulls no AWS SDK (and no aws-lc
+# C-toolchain requirement) — same posture as kafka-io.
+kinesis-io = ["ferrodruid-ingest-kinesis/kinesis-io"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+ferrodruid-query = { path = "../ferrodruid-query" }
+async-trait.workspace = true
