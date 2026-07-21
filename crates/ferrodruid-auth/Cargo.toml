@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-auth"
+version = "1.5.1"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Authentication — Basic auth, Argon2id, LDAP, FerroAuth for FerroDruid."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+argon2.workspace = true
+base64 = "0.22"
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true

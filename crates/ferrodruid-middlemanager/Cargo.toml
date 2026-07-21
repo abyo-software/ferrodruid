@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-middlemanager"
+version = "1.5.1"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Ingestion task execution via tokio tasks for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+ferrodruid-ingest-batch = { path = "../ferrodruid-ingest-batch" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true

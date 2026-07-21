@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-telemetry"
+version = "1.5.1"
+edition = "2024"
+license = "BUSL-1.1"
+description = "StatsD, Prometheus, OpenTelemetry, and health endpoints for FerroDruid."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+prometheus.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true

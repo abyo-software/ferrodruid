@@ -1,0 +1,17 @@
+{
+  "queryType": "topN",
+  "dataSource": {"type": "table", "name": "wikipedia"},
+  "intervals": ["2024-01-01T00:00:00.000Z/2024-01-03T00:00:00.000Z"],
+  "granularity": "all",
+  "dimension": {
+    "type": "default",
+    "dimension": "region",
+    "outputName": "region",
+    "outputType": "STRING"
+  },
+  "threshold": 3,
+  "metric": {"type": "numeric", "metric": "rows"},
+  "aggregations": [
+    {"type": "count", "name": "rows"}
+  ]
+}

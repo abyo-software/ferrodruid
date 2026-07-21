@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-migrate"
+version = "1.5.1"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid migration tool — import Druid metadata and segments + W1-I cross-role cert helper."
+
+[[bin]]
+name = "ferrodruid-migrate"
+path = "src/main.rs"
+
+[dependencies]
+ferrodruid-import-export = { path = "../../crates/ferrodruid-import-export" }
+ferrodruid-metadata = { path = "../../crates/ferrodruid-metadata" }
+# compat-7: `import-druid-metadata`'s READ-ONLY source reader
+# (`read_druid_source` — used druid_segments rows + SegmentPayload
+# decode from a foreign Druid metadata DB on PG/MySQL/SQLite).
+ferrodruid-metadata-schema = { path = "../../crates/ferrodruid-metadata-schema" }
+ferrodruid-common = { path = "../../crates/ferrodruid-common" }
+# `assess` opens candidate segments with the real v9 reader
+# (SegmentData::open) so the readability verdict is the reader's own.
+ferrodruid-segment = { path = "../../crates/ferrodruid-segment" }
+# `attach` imports Druid segments into the FerroDruid deep-storage layout
+# (LocalDeepStorage::upload_segment) and stamps the shared
+# `blob_content_hash` into each metadata row's loadSpec.
+ferrodruid-deep-storage = { path = "../../crates/ferrodruid-deep-storage" }
+# `attach` stamps the metadata row's created_date in the same ISO-8601
+# millisecond format the live publish tails use.
+chrono.workspace = true
+clap = { version = "4", features = ["derive"] }
+# W1-I (CL-J1): rcgen powers the `gen-cross-role-certs` helper;
+# thiserror gives the helper a typed error variant.
+rcgen.workspace = true
+serde_json.workspace = true
+# `assess` extracts each `index.zip` into a throwaway tempdir before
+# handing it to the v9 reader.
+tempfile.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+# Druid packs local deep-storage segments as deflate `index.zip`
+# archives (when `druid.storage.zip=true`); same pin as the
+# tests/segment-compat harness.
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[target.'cfg(unix)'.dependencies]
+# `O_NOFOLLOW` for the symlink-refusing source opens in `assess`
+# (descriptor.json / index.zip / smoosh staging — Codex compat-2 R2 H2):
+# only the flag constant, applied via the safe
+# `std::os::unix::fs::OpenOptionsExt::custom_flags`.
+libc.workspace = true
+
+[dev-dependencies]
+# Used in the helper's unit tests to validate the generated CA + leaf
+# chain by attempting to build a real rustls server config from it.
+rustls.workspace = true
+rustls-pemfile.workspace = true
+rustls-pki-types.workspace = true
+# The attach integration test drives the REAL post-attach path: it runs
+# `Overlord::bootstrap_reload_segments` against the store + deep storage
+# the CLI wrote and asserts the attached segment is query-visible on the
+# Historical (the exact sequence the next `ferrodruid serve` runs).
+ferrodruid-overlord = { path = "../../crates/ferrodruid-overlord" }
+ferrodruid-historical = { path = "../../crates/ferrodruid-historical" }
+ferrodruid-query = { path = "../../crates/ferrodruid-query" }
+# The compat-7 integration test builds its SQLite druid_segments source
+# fixture directly (Druid-shaped DDL + rows the importer then reads).
+sqlx.workspace = true
+# The W-C MinIO E2E puts fixture objects into fake-S3 with the raw
+# object_store client (already a workspace dependency via
+# ferrodruid-deep-storage — no new crate).
+object_store.workspace = true

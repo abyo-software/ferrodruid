@@ -1,0 +1,49 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "dataSchema": {
+      "dataSource": "wikipedia_compat",
+      "timestampSpec": {
+        "column": "timestamp",
+        "format": "iso"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          "page",
+          "user",
+          "language",
+          "city",
+          "namespace",
+          "channel"
+        ]
+      },
+      "metricsSpec": [
+        { "type": "count", "name": "count" },
+        { "type": "longSum", "name": "added", "fieldName": "added" },
+        { "type": "longSum", "name": "deleted", "fieldName": "deleted" },
+        { "type": "longSum", "name": "delta", "fieldName": "delta" }
+      ],
+      "granularitySpec": {
+        "type": "uniform",
+        "segmentGranularity": "DAY",
+        "queryGranularity": "HOUR",
+        "rollup": true
+      }
+    },
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "inline",
+        "data": "{\"timestamp\":\"2024-01-01T00:00:00Z\",\"page\":\"Main_Page\",\"user\":\"Alice\",\"language\":\"en\",\"city\":\"San_Francisco\",\"namespace\":\"Main\",\"channel\":\"#en.wikipedia\",\"added\":100,\"deleted\":10,\"delta\":90}\n{\"timestamp\":\"2024-01-01T01:00:00Z\",\"page\":\"Talk:Main_Page\",\"user\":\"Bob\",\"language\":\"en\",\"city\":\"New_York\",\"namespace\":\"Talk\",\"channel\":\"#en.wikipedia\",\"added\":50,\"deleted\":5,\"delta\":45}\n{\"timestamp\":\"2024-01-01T02:00:00Z\",\"page\":\"Accueil\",\"user\":\"Claude\",\"language\":\"fr\",\"city\":\"Paris\",\"namespace\":\"Main\",\"channel\":\"#fr.wikipedia\",\"added\":200,\"deleted\":20,\"delta\":180}\n{\"timestamp\":\"2024-01-01T03:00:00Z\",\"page\":\"Hauptseite\",\"user\":\"Diana\",\"language\":\"de\",\"city\":\"Berlin\",\"namespace\":\"Main\",\"channel\":\"#de.wikipedia\",\"added\":150,\"deleted\":30,\"delta\":120}\n{\"timestamp\":\"2024-01-01T12:00:00Z\",\"page\":\"Main_Page\",\"user\":\"Eve\",\"language\":\"en\",\"city\":\"London\",\"namespace\":\"Main\",\"channel\":\"#en.wikipedia\",\"added\":75,\"deleted\":25,\"delta\":50}\n{\"timestamp\":\"2024-01-02T00:00:00Z\",\"page\":\"Main_Page\",\"user\":\"Alice\",\"language\":\"en\",\"city\":\"San_Francisco\",\"namespace\":\"Main\",\"channel\":\"#en.wikipedia\",\"added\":120,\"deleted\":15,\"delta\":105}\n{\"timestamp\":\"2024-01-02T06:00:00Z\",\"page\":\"Portal:Current_events\",\"user\":\"Frank\",\"language\":\"en\",\"city\":\"Tokyo\",\"namespace\":\"Portal\",\"channel\":\"#en.wikipedia\",\"added\":300,\"deleted\":50,\"delta\":250}\n{\"timestamp\":\"2024-01-02T12:00:00Z\",\"page\":\"Accueil\",\"user\":\"Claude\",\"language\":\"fr\",\"city\":\"Paris\",\"namespace\":\"Main\",\"channel\":\"#fr.wikipedia\",\"added\":180,\"deleted\":40,\"delta\":140}\n{\"timestamp\":\"2024-01-03T00:00:00Z\",\"page\":\"Main_Page\",\"user\":\"Grace\",\"language\":\"en\",\"city\":\"Sydney\",\"namespace\":\"Main\",\"channel\":\"#en.wikipedia\",\"added\":90,\"deleted\":10,\"delta\":80}\n{\"timestamp\":\"2024-01-03T08:00:00Z\",\"page\":\"Pagina_principale\",\"user\":\"Heidi\",\"language\":\"it\",\"city\":\"Rome\",\"namespace\":\"Main\",\"channel\":\"#it.wikipedia\",\"added\":110,\"deleted\":20,\"delta\":90}"
+      },
+      "inputFormat": {
+        "type": "json"
+      }
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "maxRowsPerSegment": 5000000,
+      "maxRowsInMemory": 25000
+    }
+  }
+}

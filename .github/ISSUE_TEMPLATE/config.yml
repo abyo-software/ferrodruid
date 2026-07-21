@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+blank_issues_enabled: true
+contact_links:
+  - name: Commercial support (AWS Marketplace)
+    url: "https://aws.amazon.com/marketplace/search/results?searchTerms=FerroDruid"
+    about: >-
+      Paid FerroDruid AMI and container products on AWS Marketplace include
+      commercial support.
+  - name: Security reports
+    url: "https://github.com/abyo-software/ferrodruid/blob/main/SECURITY.md"
+    about: >-
+      Please do not open public issues for vulnerabilities — email
+      aws-support@abyo.net as described in SECURITY.md.

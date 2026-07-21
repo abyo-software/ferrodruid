@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-plugin-http-jsonl"
+version = "1.0.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid WASM plugin: HTTP-JSONL input source (capability-gated network)."
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Global allocator for `#![no_std]` wasm32 cdylib.
+dlmalloc = { version = "0.2", features = ["global"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
+[workspace]
