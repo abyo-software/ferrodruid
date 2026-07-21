@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-sql"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Druid SQL dialect parser and query planner (Calcite-compatible)."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-query = { path = "../ferrodruid-query" }
+ferrodruid-aggregator = { path = "../ferrodruid-aggregator" }
+sqlparser = "0.53"
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+ferrodruid-bitmap = { path = "../ferrodruid-bitmap" }
+ferrodruid-dict = { path = "../ferrodruid-dict" }
+ferrodruid-lookup = { path = "../ferrodruid-lookup" }
+serde_json.workspace = true
+proptest = "1.4"

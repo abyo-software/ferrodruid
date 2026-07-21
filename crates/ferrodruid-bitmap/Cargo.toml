@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-bitmap"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Roaring bitmap with Druid-compatible binary serialization."
+
+[dependencies]
+roaring.workspace = true
+bytes.workspace = true
+byteorder.workspace = true
+thiserror.workspace = true
+ferrodruid-common = { path = "../ferrodruid-common" }

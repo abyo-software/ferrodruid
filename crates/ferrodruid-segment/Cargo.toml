@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-segment"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Druid Segment file format v9/FDX reader and writer."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-compression = { path = "../ferrodruid-compression" }
+ferrodruid-bitmap = { path = "../ferrodruid-bitmap" }
+ferrodruid-dict = { path = "../ferrodruid-dict" }
+ferrodruid-sketches = { path = "../ferrodruid-sketches" }
+bytes.workspace = true
+byteorder.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+proptest = "1.4"

@@ -1,0 +1,197 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# cargo-deny configuration for FerroDruid
+
+[advisories]
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+# cargo-deny >= 0.16 dropped the per-severity advisory fields
+# (`vulnerability`, `unmaintained`, `yanked`, `notice` taking "warn" /
+# "deny" / "allow"). Severity is now implicit — every advisory is an
+# error unless explicitly listed in `ignore` below — and `unmaintained`
+# instead takes a SCOPE controlling which dep tree segment to flag
+# unmaintained crates in: "all" / "workspace" / "transitive" / "none".
+# Keep "all" so the prior warn-equivalent coverage is preserved; the
+# explicit `ignore` list remains the override surface.
+unmaintained = "all"
+ignore = [
+    # 2026-04-30 drift sweep: protobuf 2.28.0 transits via prometheus 0.13.4
+    # (telemetry encode-only path). FerroDruid never parses untrusted protobuf
+    # input from network; metrics are emitted from in-process counters. No
+    # upstream upgrade path until prometheus moves to protobuf 3.x.
+    # Next review: 2026-07-30.
+    "RUSTSEC-2024-0437",
+    # 2026-04-30 drift sweep (round 3): instant 0.1.13 unmaintained, transits
+    # via parking_lot < 0.13 (likely poem/jsonwebtoken old chain). web-time is
+    # the maintained replacement; bumping is non-trivial. Next review 2026-07-30.
+    "RUSTSEC-2024-0384",
+    # 2026-04-30 drift sweep (round 3): rustls-pemfile 2.2.0 unmaintained,
+    # transits via object_store / aws-sdk. Replacement is rustls-pki-types
+    # 1.9.0+ inline PEM parsing; rustls-pemfile is a thin wrapper. Next
+    # review 2026-07-30.
+    "RUSTSEC-2025-0134",
+    # 2026-04-30 drift sweep: rsa 0.9.10 transits via sqlx-mysql -> sqlx-macros-core
+    # (compile-time only). FerroDruid does not enable the sqlx mysql runtime
+    # feature; the vulnerable Marvin-attack code path is never reachable in the
+    # produced binary. No fix available upstream as of 2026-04.
+    # Next review: 2026-07-30.
+    "RUSTSEC-2023-0071",
+    # 2026-06-16 supply-chain hardening: paste 1.0.15 is an unmaintained
+    # (archived upstream) proc-macro crate that transits via parquet 55.2.0
+    # -> ferrodruid-ingest-batch. It is a compile-time-only token-pasting
+    # macro; no code from `paste` ships in the runtime binary and there is no
+    # safe upgrade (the author archived the repo). The maintained successor
+    # `pastey` is a drop-in but the bump must happen upstream in parquet/arrow.
+    # No exploitable surface; informational unmaintained advisory only.
+    # Next review: 2026-09-16.
+    "RUSTSEC-2024-0436",
+    # 2026-06-16 supply-chain: rustls-webpki name-constraint (URI/wildcard) +
+    # CRL-parse-panic advisories, reachable ONLY through
+    # tokio-rustls 0.24.1 <- hyper-rustls 0.24.2 <- aws-smithy-http-client
+    # 1.1.13 — the HTTPS connector of the AWS SDK that is pulled in ONLY by the
+    # default-OFF `marketplace-metering` feature (the paid Container image).
+    # The OSS/default build and the AMI product never compile it. When the
+    # feature IS on, the sole TLS peer is the fixed AWS Marketplace Metering
+    # endpoint (metering.marketplace.<region>.amazonaws.com) for the one-shot
+    # RegisterUsage startup call; exploiting these (incorrectly ACCEPTING a cert
+    # with crafted URI/wildcard name constraints, or a panic parsing a malicious
+    # CRL) requires a malicious certificate/CRL from that trusted AWS endpoint —
+    # not a realistic threat. No upstream fix exists yet: the patched
+    # rustls-webpki (>=0.103.12) is a major bump that aws-smithy-http-client
+    # 1.1.13's pinned hyper-rustls 0.24.2 cannot take. Revisit when
+    # aws-smithy-http-client drops hyper-rustls 0.24. Next review: 2026-07-16.
+    "RUSTSEC-2026-0098",
+    "RUSTSEC-2026-0099",
+    "RUSTSEC-2026-0104",
+    # 2026-07-12 public audit: quick-xml 0.38.4 quadratic duplicate-attribute
+    # check (0194) + unbounded NsReader namespace allocation (0195). Both are
+    # DoS-class and patched only in quick-xml >= 0.41.0, but every released
+    # object_store (incl. 0.14.0) pins quick-xml < 0.41, so no upgrade path
+    # exists yet. Exposure assessment: quick-xml parses XML only from
+    # configured/trusted service boundaries — the S3-compatible deep-storage
+    # endpoint (ListObjects etc.) and, via object_store, web-identity STS /
+    # S3 Express session responses. An attacker who controls those responses
+    # already controls the segment store or the credential provider; worst
+    # case here is CPU/memory DoS of one process. Revisit when
+    # object_store allows quick-xml 0.41. Next review: 2026-08-01.
+    "RUSTSEC-2026-0194",
+    "RUSTSEC-2026-0195",
+]
+
+[licenses]
+# cargo-deny >= 0.14 dropped per-classification fields like `unlicensed`,
+# `copyleft`, `allow-osi-fsf-free`, `default`. Licensing is now governed
+# strictly by the `allow` list (anything not in `allow` is denied) and
+# the explicit `deny` list below. Keeping the deny block for clarity
+# even though it is technically redundant against the closed-by-default
+# `allow` list.
+
+allow = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "0BSD",
+    "BSL-1.0",
+    "CC0-1.0",
+    "OpenSSL",
+    "MPL-2.0",
+    # 2026-04-30 drift sweep: CDLA-Permissive-2.0 used by webpki-roots
+    # (transitive via tantivy / sqlx-macros-core / etc). Permissive open
+    # data license accepted broadly across permissive ecosystems.
+    "CDLA-Permissive-2.0",
+]
+
+# 2026-07-12 public audit (round 3): BUSL-1.1 is allowed ONLY for the
+# first-party workspace crates via per-crate exceptions — a global
+# `allow = ["BUSL-1.1"]` would silently admit third-party BUSL
+# dependencies, contradicting the allowlist policy above. The list below
+# is exactly the 53 workspace members.
+# (regenerate: cargo metadata --no-deps | jq '.packages[].name')
+exceptions = [
+    { name = "ferrodruid", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-aggregator", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-auth", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-authz", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-bitmap", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-broker", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-broker-bin", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-cli", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-cli-lib", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-cluster", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-common", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-compat-check", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-compression", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-coordinator", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-coordinator-bin", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-deep-storage", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-dict", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-discovery", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-events", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-historical", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-historical-bin", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-import-export", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-ingest-batch", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-ingest-deltalake", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-ingest-iceberg", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-ingest-kafka", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-ingest-kinesis", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-loadrules", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-logcompat", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-lookup", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-marketplace", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-metadata", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-metadata-schema", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-middlemanager", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-middlemanager-bin", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-migrate", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-msq", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-overlord", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-overlord-bin", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-plugin-rt", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-query", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-rest", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-role", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-router", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-router-bin", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-rpc", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-search", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-segment", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-sketches", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-sql", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-telemetry", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-tiered", allow = ["BUSL-1.1"] },
+    { name = "ferrodruid-ui", allow = ["BUSL-1.1"] },
+]
+
+# cargo-deny >= 0.16 removed the per-license `deny` list — licensing is
+# closed-by-default against the `allow` list above, so any GPL/AGPL/SSPL/
+# LGPL/EUPL crate that lands in the dependency graph fails the licenses
+# check automatically. The previous explicit deny list is preserved as a
+# comment for human reference:
+#   GPL-2.0[*], GPL-3.0[*], AGPL-1.0[*], AGPL-3.0[*], SSPL-1.0,
+#   EUPL-1.1/1.2, LGPL-2.0[*], LGPL-2.1[*], LGPL-3.0[*]
+
+confidence-threshold = 0.8
+
+[[licenses.clarify]]
+name = "ring"
+expression = "MIT AND ISC AND OpenSSL"
+license-files = [{ path = "LICENSE", hash = 0xbd0eed23 }]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+highlight = "all"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

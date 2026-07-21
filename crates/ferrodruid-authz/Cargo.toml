@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-authz"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Druid BasicAuthorizer compatible RBAC for FerroDruid."
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-auth = { path = "../ferrodruid-auth" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true

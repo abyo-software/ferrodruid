@@ -1,0 +1,5 @@
+{
+  "queryType": "timeBoundary",
+  "dataSource": {"type": "table", "name": "wikipedia"},
+  "bound": "maxTime"
+}

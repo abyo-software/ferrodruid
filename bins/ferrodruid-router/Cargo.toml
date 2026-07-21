@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-router-bin"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "FerroDruid v1.0 router-role launcher (Wave 38.FF scaffold)."
+
+[[bin]]
+name = "ferrodruid-router"
+path = "src/main.rs"
+
+[dependencies]
+ferrodruid-common = { path = "../../crates/ferrodruid-common" }
+ferrodruid-role = { path = "../../crates/ferrodruid-role" }
+ferrodruid-rpc = { path = "../../crates/ferrodruid-rpc" }
+anyhow.workspace = true
+axum.workspace = true
+clap = { version = "4", features = ["derive", "env"] }
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

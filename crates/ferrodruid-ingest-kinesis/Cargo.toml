@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+[package]
+name = "ferrodruid-ingest-kinesis"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Kinesis indexing service for FerroDruid."
+
+[features]
+# Default OFF. With the feature OFF the crate builds with NO aws-sdk
+# dependency compiled and is fully unit-testable offline (no network, no
+# AWS credentials, no C toolchain): the `KinesisSource` trait, the
+# sequence-number resume frontier, record decode, and the deterministic
+# in-memory `MockKinesisSource` are all feature-free. Mirrors the
+# `kafka-io` / `marketplace-metering` posture.
+default = []
+# Compiles the real AWS-backed `KinesisSource` adapter
+# (`AwsKinesisSource`) on top of the official aws-sdk-kinesis client
+# (rustls TLS via the SDK's default https client; note the SDK's default
+# crypto provider is aws-lc-rs, which needs cc/cmake at build time —
+# same toolchain posture as `kafka-io`'s rdkafka cmake build).
+kinesis-io = ["dep:aws-sdk-kinesis", "dep:aws-config"]
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+
+# Optional — only compiled when `kinesis-io` is enabled. The default
+# build must carry NO aws dependency (verified by `cargo tree`).
+aws-sdk-kinesis = { version = "1", optional = true }
+aws-config = { version = "1", optional = true }

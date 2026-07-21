@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# v1.5.0 W-B — Apache Druid 30.0.1 as a SECOND legacy-null oracle.
+#
+# Druid 28+ default to SQL-compatible (ANSI) nulls, but 30.0.1 still
+# HONORS `druid.generic.useDefaultValueForNull=true` (verified
+# 2026-07-20: boots with only a WARN in the peon log and answers the
+# legacy_null_compat fixture with full legacy semantics — SUM over an
+# all-null LONG = 0, COUNT(strcol) treats '' as null, `x IS NULL`
+# matches 0 rows).  Measured 2026-07-20: 31.0.2 ALSO still honors the
+# property (same WARN, same legacy answers), while 32.0.1 REFUSES TO
+# START with it (fail-loud ISE "has been removed") — see
+# tests/segment-compat/RESULTS_v150_oracle_env.md.  Druid 27 (legacy by
+# default, docker-compose.druid27.yml) remains the primary oracle.
+#
+# The stock image has no way to pass runtime properties into
+# start-micro-quickstart, so the entrypoint appends the property to the
+# micro-quickstart _common runtime.properties before exec'ing it.
+#
+# Host ports use the 26xxx prefix; `name:` keeps the project distinct
+# from every other druid-compat compose in this directory (they share
+# the default project name otherwise and `up -d` REPLACES whichever
+# stack is running).
+
+name: druid30-legacynull
+
+services:
+  druid:
+    build:
+      context: .
+      dockerfile: Dockerfile.druid.template
+      args:
+        DRUID_VERSION: 30.0.1
+    image: ferrodruid/druid-compat:30.0.1
+    entrypoint:
+      - bash
+      - -c
+      - >-
+        echo 'druid.generic.useDefaultValueForNull=true'
+        >> /opt/druid/conf/druid/single-server/micro-quickstart/_common/common.runtime.properties
+        && exec /opt/druid/bin/start-micro-quickstart
+    ports:
+      - "26888:8888"   # Router
+      - "26081:8081"   # Coordinator
+      - "26082:8082"   # Broker
+      - "26083:8083"   # Historical
+      - "26090:8090"   # Overlord
+      - "26091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 300s

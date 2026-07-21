@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-rest"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "Axum HTTP server and Druid REST API for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+ferrodruid-query = { path = "../ferrodruid-query" }
+ferrodruid-sql = { path = "../ferrodruid-sql" }
+ferrodruid-broker = { path = "../ferrodruid-broker" }
+ferrodruid-historical = { path = "../ferrodruid-historical" }
+ferrodruid-coordinator = { path = "../ferrodruid-coordinator" }
+ferrodruid-overlord = { path = "../ferrodruid-overlord" }
+ferrodruid-metadata = { path = "../ferrodruid-metadata" }
+ferrodruid-auth = { path = "../ferrodruid-auth" }
+ferrodruid-authz = { path = "../ferrodruid-authz" }
+ferrodruid-telemetry = { path = "../ferrodruid-telemetry" }
+ferrodruid-lookup = { path = "../ferrodruid-lookup" }
+ferrodruid-msq = { path = "../ferrodruid-msq" }
+ferrodruid-ui = { path = "../ferrodruid-ui" }
+ferrodruid-segment = { path = "../ferrodruid-segment" }
+axum.workspace = true
+tower-http.workspace = true
+tower.workspace = true
+parking_lot.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+
+[dev-dependencies]
+tower = { workspace = true, features = ["util"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "process", "time", "signal"] }
+http-body-util = "0.1"
+ferrodruid-ingest-batch = { path = "../ferrodruid-ingest-batch" }
+ferrodruid-bitmap = { path = "../ferrodruid-bitmap" }
+ferrodruid-dict = { path = "../ferrodruid-dict" }
+# Fail-closed cardinality e2e (2026-07-11): the test lowers the exact-set
+# cap via the aggregator crate's test-only override to drive saturation
+# without inserting 1,000,000 keys.
+ferrodruid-aggregator = { path = "../ferrodruid-aggregator" }
+tempfile.workspace = true
+reqwest.workspace = true
+base64 = "0.22"

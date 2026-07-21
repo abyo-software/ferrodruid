@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+
+[package]
+name = "ferrodruid-deep-storage"
+version = "1.5.0"
+edition = "2024"
+license = "BUSL-1.1"
+description = "S3/GCS/Azure/Local deep storage abstraction for FerroDruid"
+
+[dependencies]
+ferrodruid-common = { path = "../ferrodruid-common" }
+object_store.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+bytes.workspace = true
+async-trait.workspace = true
+futures.workspace = true
+url.workspace = true
+# Content-identity hash of a segment blob directory (`blob_content_hash`):
+# stamped into a metadata row's `payload.loadSpec.sha256` by the publish
+# tails (ferrodruid-overlord) and by `ferrodruid-migrate attach`, re-checked
+# at bootstrap reload so a swapped / silently corrupted durable blob fails
+# loud instead of serving different data (H2).
+sha2.workspace = true
+hex.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+tokio = { workspace = true, features = ["full"] }
+wiremock = { workspace = true }
+bytes = { workspace = true }
+object_store = { workspace = true }
+# Only for the gated real-S3 "read a real Druid segment from S3" test
+# (P0-A). No cycle: ferrodruid-segment does not depend on deep-storage.
+ferrodruid-segment = { path = "../ferrodruid-segment" }

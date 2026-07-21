@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: BUSL-1.1
+# Copyright 2026 abyo software 合同会社 (abyo software LLC)
+#
+# v1.5.0 W-B — Apache Druid 27.0.0 LEGACY-NULL oracle.
+#
+# Druid 27 is the newest release where legacy null handling
+# (`druid.generic.useDefaultValueForNull=true`) is still the DEFAULT —
+# no property override needed.  Druid 28 flipped the default to
+# SQL-compatible (ANSI) nulls, so 27 is the canonical black-box oracle
+# for the legacy semantics FerroDruid's W-B legacy-null mode must
+# reproduce.  (Property-override status measured 2026-07-20: 30.0.1 and
+# 31.0.2 still HONOR the property with a WARN; 32.0.1 REFUSES TO START
+# with it (fail-loud ISE "has been removed") — see
+# tests/segment-compat/RESULTS_v150_oracle_env.md.)
+#
+# Host ports use the 27xxx prefix so this stack can run alongside
+# v30..v36 without conflict.
+#
+# NOTE the explicit top-level `name:`.  All druid-compat compose files
+# live in this directory, so without it they share the default project
+# name `druid-compat` and `docker compose -f docker-compose.druid27.yml
+# up -d` silently RECREATES the container of whichever other version is
+# running (observed 2026-07-20: it replaced a live druid31 stack).  The
+# 27xxx host ports alone do NOT protect against that.
+
+name: druid27-compat
+
+services:
+  druid:
+    build:
+      context: .
+      dockerfile: Dockerfile.druid.template
+      args:
+        DRUID_VERSION: 27.0.0
+    image: ferrodruid/druid-compat:27.0.0
+    ports:
+      - "27888:8888"   # Router
+      - "27081:8081"   # Coordinator
+      - "27082:8082"   # Broker
+      - "27083:8083"   # Historical
+      - "27090:8090"   # Overlord
+      - "27091:8091"   # MiddleManager
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/status/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 300s

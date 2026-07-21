@@ -1,0 +1,9 @@
+{
+  "queryType": "scan",
+  "dataSource": {"type": "table", "name": "wikipedia"},
+  "intervals": ["2024-01-01T00:00:00.000Z/2024-01-03T00:00:00.000Z"],
+  "filter": {"type": "selector", "dimension": "region", "value": "eu"},
+  "columns": ["__time", "region", "added"],
+  "resultFormat": "list",
+  "limit": 10
+}

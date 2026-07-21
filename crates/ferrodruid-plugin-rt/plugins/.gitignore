@@ -1,0 +1,4 @@
+# Build artifacts for the standalone plugin packages; the committed
+# `.wasm` lives under `dist/` instead.
+target/
+**/Cargo.lock
